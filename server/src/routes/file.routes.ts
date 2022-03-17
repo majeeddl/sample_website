@@ -1,6 +1,8 @@
 import { Router } from "express";
-import { GridFSBucket } from "mongodb";
-import multer,{ diskStorage } from "multer";
+import { GridFSBucket, GridFSBucketReadStream } from "mongodb";
+import multer, { diskStorage } from "multer";
+import contentDisposition = require("content-disposition");
+import { getType } from "mime";
 
 import { createReadStream, existsSync, mkdirSync, unlinkSync } from "fs";
 
@@ -11,7 +13,59 @@ import { Database } from "../database/database";
 
 const router = Router();
 
-router.post("api/v1/file", async (req: IRequest, res: IResponse) => {
+router.get("/api/v1/file/:name", async (req: IRequest, res: IResponse) => {
+  try {
+    const database = new Database();
+    const db = await database.getMongoDb();
+    let bucket = new GridFSBucket(db);
+
+    let findFile = await db.collection("fs.files").findOne({
+      filename: req.params.name,
+    });
+
+    let downloadStream: GridFSBucketReadStream = bucket.openDownloadStream(
+      findFile._id
+    );
+
+    const ext = findFile.filename.split(".")[1];
+    const mimetype = getType(ext);
+
+    console.log(ext);
+
+    // res.setHeader(
+    //   "Content-disposition",
+    //   contentDisposition(findFile.metadata.originalName)
+    // );
+    // res.setHeader("Content-type", mimetype!);
+    // res.setHeader("Access-Control-Allow-Origin", "*");
+
+    // downloadStream.pipe(res).on("finish", function () {
+    //   db.close();
+    // });
+
+    // // res.setHeader(
+    // //   "Content-disposition",
+    // //   contentDisposition(findFile.metadata.originalName)
+    // // );
+    res.setHeader("Content-type", mimetype!);
+    res.setHeader("Cache-Control", "no-cache");
+    downloadStream.on("data", (chunk) => {
+      res.write(chunk);
+    });
+
+    downloadStream.on("error", () => {
+      db.close();
+      res.status(404);
+    });
+
+    downloadStream.on("end", () => {
+      db.close();
+      res.end();
+    });
+  } catch (e) {}
+});
+
+router.post("/api/v1/file", async (req: IRequest, res: IResponse) => {
   try {
     const _path = "./upload/";
 
@@ -61,74 +115,67 @@ router.post("api/v1/file", async (req: IRequest, res: IResponse) => {
       },
     });
 
+    upload.any()(req, res, async (err: any) => {
+      if (err) {
+        let message = "";
+        let result = -1;
+        if (err.code == "LIMIT_FILE_SIZE") {
+          message = "file size should be less than 10 megabyte";
+        } else if (err == "mimetype") {
+          message = "file type is not correct";
+        }
 
-upload.any()(req, res, async (err:any)=> {
-            if(err){
-                let message = "";
-                let result = -1;
-                if (err.code == 'LIMIT_FILE_SIZE') {
-                    message = "file size should be less than 10 megabyte"
-                } else if (err == "mimetype") {
-                    message = "file type is not correct";
-                }
+        res.json({
+          result: result,
+          type: "error",
+          message: message,
+        });
+      } else {
+        let token = v4();
+        const database = new Database();
+        const db = await database.getMongoDb();
 
-                res.json({
-                    result: result,
-                    type: "error",
-                    message: message
-                });
+        const bucket = new GridFSBucket(db);
 
-            }else{
+        createReadStream(_path + fileName)
+          .pipe(
+            bucket.openUploadStream(fileName, {
+              metadata: {
+                type: req.params.type,
+                originalName: originalName,
+                token: token,
+              },
+            })
+          )
+          .on("error", function (error: any) {
+            db.close();
 
-                let token = v4();
-                const database = new Database();
-                const db = await database.getMongoDb();
+            unlinkSync(_path + fileName);
 
-                const bucket = new GridFSBucket(db);
+            res.json({
+              result: -1,
+              type: "error",
+              title: "",
+              message: "",
+            });
+          })
+          .on("finish", function () {
+            db.close();
 
-                  createReadStream(_path + fileName)
-                    .pipe(
-                      bucket.openUploadStream(fileName, {
-                        metadata: {
-                          type: req.params.type,
-                          originalName: originalName,
-                          token: token,
-                        },
-                      })
-                    )
-                    .on("error", function (error: any) {
-                      db.close();
-
-                      unlinkSync(_path + fileName);
-
-                      res.json({
-                        result: -1,
-                        type: "error",
-                        title: "",
-                        message: "",
-                      });
-                    })
-                    .on("finish", function () {
-                      db.close();
-
-                      unlinkSync(_path + fileName);
-                      res.json({
-                        status: true,
-                        result: 0,
-                        type: "success",
-                        message: "file is uploaded successfully",
-                        originalName: originalName,
-                        fileName: fileName,
-                        token: token
-                      });
-                    });
-      
-            }});
-
+            unlinkSync(_path + fileName);
+            res.json({
+              status: true,
+              result: 0,
+              type: "success",
+              message: "file is uploaded successfully",
+              originalName: originalName,
+              fileName: fileName,
+              token: token,
+            });
+          });
+      }
+    });
   } catch {}
-
-
-
 });
 
 export const FileRouter = router;

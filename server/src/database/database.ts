@@ -25,10 +25,12 @@ export class Database {
   public async getMongoDb() {
     let _mongoClient = new MongoClient(this._mongoUrl);
 
-    let db: any = await _mongoClient.connect();
+    await _mongoClient.connect();
+
+    let db: any = _mongoClient.db();
 
     db.close = () => {
-      db.close();
+      _mongoClient.close();
     };
 
     return db;

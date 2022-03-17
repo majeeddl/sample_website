@@ -104,3 +104,5 @@ dist
 .tern-port
 server/yarn.lock
 client/yarn.lock
+build
+upload

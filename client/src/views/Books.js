@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import { List, Avatar, Space, Divider, Spin, Alert } from "antd";
+import {
+  List,
+  Avatar,
+  Space,
+  Divider,
+  Spin,
+  Popconfirm,
+  message,
+  Button,
+  notification,
+} from "antd";
+import { PlusCircleOutlined } from "@ant-design/icons";
 
 const Books = () => {
   const [loading, setLoading] = useState(true);
@@ -11,28 +23,75 @@ const Books = () => {
     },
   ]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const { data: response } = await axios.get(
-          "http://192.168.56.1:3001/api/v1/books"
-        );
-        setBooks(response.data);
-      } catch (e) {
-        console.log(e);
-      }
-      setLoading(false);
-    };
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const { data: response } = await axios.get(
+        "http://localhost:3001/api/v1/books"
+      );
+      setBooks(response.data);
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
+  };
 
+  useEffect(() => {
     fetchData();
   }, []);
+
+  const navigate = useNavigate();
+  const goCreateBook = () => {
+    navigate("/books/create");
+  };
+
+  const goEditBook = (id) => {
+    navigate("/books/edit/" + id);
+  };
+
+  const confirm = async (id) => {
+    // console.log(e);
+    try {
+      const { data: response } = await axios.delete(
+        `http://localhost:3001/api/v1/books/${id}`
+      );
+
+      if (response.status) {
+        openNotificationWithIcon("success", "The book is deleted successfully");
+        fetchData();
+      }
+    } catch (e) {
+      console.log(e);
+    }
+    setLoading(false);
+  };
+  const openNotificationWithIcon = (type, msg) => {
+    notification[type]({
+      message: msg,
+    });
+  };
+
+  const cancel = (e) => {
+    console.log(e);
+    // message.error("Click on No");
+  };
 
   return (
     <div>
       <div className="mt-20 text-left">
         <h3 className="text-2xl">Books</h3>
-        <div className="mt-2">You can see the list of books here:</div>
+        <div className="mt-2">
+          You can see the list of books here:
+          <div className="float-right">
+            <Button
+              icon={<PlusCircleOutlined />}
+              type="primary"
+              onClick={goCreateBook}
+            >
+              Add New Book
+            </Button>
+          </div>
+        </div>
         <Divider></Divider>
         <div className="mt-2">
           <Spin tip="Loading..." spinning={loading}>
@@ -54,31 +113,32 @@ const Books = () => {
               renderItem={(item) => (
                 <List.Item
                   key={item.title}
-                  actions={
-                    [
-                      // <IconText
-                      //   icon={StarOutlined}
-                      //   text="156"
-                      //   key="list-vertical-star-o"
-                      // />,
-                      // <IconText
-                      //   icon={LikeOutlined}
-                      //   text="156"
-                      //   key="list-vertical-like-o"
-                      // />,
-                      // <IconText
-                      //   icon={MessageOutlined}
-                      //   text="2"
-                      //   key="list-vertical-message"
-                      // />,
-                    ]
-                  }
+                  actions={[
+                    <a
+                      key="list-loadmore-edit"
+                      onClick={() => goEditBook(item._id)}
+                    >
+                      edit
+                    </a>,
+                    <Popconfirm
+                      title="Are you sure to delete this task?"
+                      onConfirm={() => confirm(item._id)}
+                      onCancel={cancel}
+                      okText="Yes"
+                      cancelText="No"
+                    >
+                      <a key="list-loadmore-more" href="#">
+                        delete
+                      </a>
+                    </Popconfirm>,
+                  ]}
                   extra={
-                    <img
-                      width={272}
-                      alt="logo"
-                      src="https://gw.alipayobjects.com/zos/rmsportal/mqaQswcyDLcXyDKnZfES.png"
-                    />
+                    // <img
+                    //   width={272}
+                    //   alt="logo"
+                    //   src={"http://localhost:3001/api/v1/file/" + item.image}
+                    // />
+                    <Avatar src={item.image} />
                   }
                 >
                   <List.Item.Meta

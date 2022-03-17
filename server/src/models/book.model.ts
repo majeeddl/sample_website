@@ -14,6 +14,12 @@ const BookSchema = new Schema<IBookModel>(
     image: {
       type: String,
     },
+    author: {
+      type: String,
+    },
+    price: {
+      type: Number,
+    },
   },
   {
     collection: "books",

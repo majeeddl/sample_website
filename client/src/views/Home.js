@@ -5,6 +5,8 @@ import { Link, Routes, Route, useLocation } from "react-router-dom";
 import { Container, Row, Col, Navbar, Nav } from "react-bootstrap";
 
 import Books from "../views/Books";
+import CreateBook from "../views/books/CreateBook";
+import EditBook from "../views/books/EditBook";
 import About from "../views/About";
 // const { Header, Footer, Sider, Content } = Layout;
 
@@ -13,10 +15,20 @@ function Main() {
     <div className="text-left mt-20">
       <h1 className="text-2xl">Sample website</h1>
       <div className="mt-2">
-        This is a sample website that is written with REACT JS.
+        This is a sample website that is written with REACT JS.I also use react
+        hooks.
       </div>
       <div className="mt-1">
-        The backend of this website is nodejs express api server.
+        The backend of this website is nodejs express api server. I have used
+        typescript for better programming.
+      </div>
+      <div>
+        You can read books and also create new book, update existing book and
+        delete book.
+      </div>
+      <div className="mt-1">
+        I implement jwt authentication but I have no enough time to complete
+        that.
       </div>
     </div>
   );
@@ -71,13 +83,14 @@ function Home(props) {
             <Routes>
               <Route path="/" element={<Main></Main>} />
               <Route path="/books" element={<Books></Books>} />
+              <Route path="/books/create" element={<CreateBook></CreateBook>} />
+              <Route path="/books/edit/:id" element={<EditBook></EditBook>} />
               <Route path="/about" element={<About></About>} />
             </Routes>
           </Col>
         </Row>
         <Row>
           <Col>
-                
             <div className="footer-copyright text-center py-3 mt-20">
               © 2022 Copyright:
               <a href="/"> sampleWebsite.com</a>
