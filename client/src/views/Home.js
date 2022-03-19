@@ -67,6 +67,9 @@ function Home(props) {
                 </NavDropdown> */}
             </Nav>
             <Nav>
+              <Nav.Link as={Link} to="/login">
+                Login
+              </Nav.Link>
               {/* <Nav.Link as={Link} to="/about">
                   More deets
                 </Nav.Link>

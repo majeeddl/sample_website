@@ -18,6 +18,7 @@ import { AuthRouter } from "./routes/auth.routes";
 import { BookRouter } from "./routes/book.routes";
 import { UserRouter } from "./routes/user.routes";
 import { FileRouter } from "./routes/file.routes";
+import { jwtMiddleware } from "./middlewares/jwt.middleware";
 
 const app: express.Application = express();
 
@@ -41,40 +42,42 @@ app.use(BookRouter);
 app.use(UserRouter);
 app.use(FileRouter);
 
+
+app.use(jwtMiddleware)
 //jwt verification
-app.use(async (req: IRequest, res: IResponse, next: any) => {
-  try {
-    const authHeader = req.headers["authorization"];
-    const token = authHeader && authHeader.split(" ")[1];
+// app.use(async (req: IRequest, res: IResponse, next: any) => {
+//   try {
+//     const authHeader = req.headers["authorization"];
+//     const token = authHeader && authHeader.split(" ")[1];
 
-    if (token == null) return res.sendStatus(401);
+//     if (token == null) return res.sendStatus(401);
 
-    const decoded: any = await verify(token, process.env.TOKEN_SECRET!);
+//     const decoded: any = await verify(token, process.env.TOKEN_SECRET!);
 
-    const userRepository = new UserRepository();
+//     const userRepository = new UserRepository();
 
-    const findUser: IUser = await userRepository.findById(decoded._id);
+//     const findUser: IUser = await userRepository.findById(decoded._id);
 
-    if (decoded.password) {
-      if (findUser.password == decoded.password) {
-        req.user = findUser;
-        return next();
-      }
-    }
+//     if (decoded.password) {
+//       if (findUser.password == decoded.password) {
+//         req.user = findUser;
+//         return next();
+//       }
+//     }
 
-    return res.status(403).send({
-      success: false,
-      message: "Failed to authenticate token.",
-    });
-  } catch (err) {
-    console.log(err);
+//     return res.status(403).send({
+//       success: false,
+//       message: "Failed to authenticate token.",
+//     });
+//   } catch (err) {
+//     console.log(err);
 
-    return res.status(403).send({
-      success: false,
-      message: "Failed to authenticate token.",
-    });
-  }
-});
+//     return res.status(403).send({
+//       success: false,
+//       message: "Failed to authenticate token.",
+//     });
+//   }
+// });
 
 
 

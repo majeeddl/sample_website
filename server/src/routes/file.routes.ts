@@ -30,27 +30,15 @@ router.get("/api/v1/file/:name", async (req: IRequest, res: IResponse) => {
     const ext = findFile.filename.split(".")[1];
     const mimetype = getType(ext);
 
-    console.log(ext);
+  
+    res.setHeader("Cross-Origin-Resource-Policy", "*");
+    res.setHeader("Access-Control-Allow-Origin", "*");
 
-    // res.setHeader(
-    //   "Content-disposition",
-    //   contentDisposition(findFile.metadata.originalName)
-    // );
-    // res.setHeader("Content-type", mimetype!);
-    // res.setHeader("Access-Control-Allow-Origin", "*");
-
-    // downloadStream.pipe(res).on("finish", function () {
-    //   db.close();
-    // });
-
-    // // res.setHeader(
-    // //   "Content-disposition",
-    // //   contentDisposition(findFile.metadata.originalName)
-    // // );
+  
     res.setHeader("Content-type", mimetype!);
-    res.setHeader("Cache-Control", "no-cache");
+    // res.setHeader("Cache-Control", "no-cache");
     downloadStream.on("data", (chunk) => {
-      res.write(chunk);
+      res.status(200).write(chunk);
     });
 
     downloadStream.on("error", () => {
@@ -59,8 +47,8 @@ router.get("/api/v1/file/:name", async (req: IRequest, res: IResponse) => {
     });
 
     downloadStream.on("end", () => {
-      db.close();
       res.end();
+      db.close();
     });
   } catch (e) {}
 });

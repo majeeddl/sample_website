@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
   Divider,
@@ -10,7 +10,7 @@ import {
   message,
   notification,
 } from "antd";
-import { UploadOutlined } from "@ant-design/icons";
+import { UploadOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 const layout = {
   labelCol: { span: 8 },
@@ -63,6 +63,11 @@ const EditBook = () => {
     form.resetFields();
   };
 
+  const navigate = useNavigate();
+  const goBooks = () => {
+    navigate("/books");
+  };
+
   const [image, setImage] = useState("");
 
   const props = {
@@ -95,7 +100,15 @@ const EditBook = () => {
   return (
     <div className="text-left">
       <div className="mt-20 ">
-        <h3 className="text-2xl">Create New Book</h3>
+        <h3 className="text-2xl">Edit Book</h3>
+        <Button
+          icon={<ArrowLeftOutlined />}
+          type="dashed"
+          className="float-right mb-2"
+          onClick={goBooks}
+        >
+          Return
+        </Button>
       </div>
       <Divider></Divider>
       <Form
@@ -117,13 +130,13 @@ const EditBook = () => {
         >
           <Input.TextArea />
         </Form.Item>
-        {/* <Form.Item label="Image">
+        <Form.Item label="Image">
           <Upload {...props} maxCount={1}>
             <Button icon={<UploadOutlined />}>Click to Upload</Button>
           </Upload>
-        </Form.Item> */}
+        </Form.Item>
         <Form.Item {...tailLayout}>
-          <Button type="" htmlType="submit">
+          <Button type="primary" htmlType="submit">
             Submit
           </Button>
           <Button htmlType="button" onClick={onReset} className="ml-2">
