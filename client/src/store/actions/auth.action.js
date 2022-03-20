@@ -1,5 +1,6 @@
+import accountService from "../../services/account.service";
 import authService from "../../services/auth.service";
-import { AUTHENTICATED, NOT_AUTHENTICATED } from "../actionTypes";
+import { AUTHENTICATED, ERROR_AUTHENTICATE, NOT_AUTHENTICATED } from "../actionTypes";
 
 const setToken = (token) => {
   localStorage.setItem("token", token);
@@ -24,16 +25,57 @@ const loginUser = (credentials) => {
   return async (dispatch) => {
     const data = await authService.login(credentials);
     if (data.token) {
+      setToken(data.token);
       dispatch({
         type: AUTHENTICATED,
         payload: data,
       });
-    }else{
-        dispatch({
-            type : NOT_AUTHENTICATED
-        })
+    } else {
+      dispatch({
+        type: ERROR_AUTHENTICATE,
+        payload : data.message
+      });
     }
   };
 };
 
-export { getToken , loginUser};
+const checkAuth = () => {
+  return async (dispatch) => {
+    const user = await accountService.getUser();
+
+    if (user) {
+      dispatch({
+        type: AUTHENTICATED,
+        payload: {
+          user,
+          token: getToken,
+        },
+      });
+    } else {
+      deleteToken();
+      dispatch({
+        type: NOT_AUTHENTICATED,
+      });
+    }
+  };
+};
+
+const logout = () => {
+  return async (dispatch) => {
+
+      deleteToken();
+      dispatch({
+        type: NOT_AUTHENTICATED,
+      });
+  };
+};
+
+const errorLogin =(dispatch,action)=>{
+  return dispatch({
+    type: ERROR_AUTHENTICATE,
+    payload : action.payload
+  });
+}
+
+
+export { getToken, loginUser, checkAuth ,logout ,errorLogin };

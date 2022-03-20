@@ -1,6 +1,13 @@
-import React from "react";
-import { Layout } from "antd";
-import { Link, Routes, Route, useLocation } from "react-router-dom";
+import React, { useState } from "react";
+import { Layout, Button, Avatar } from "antd";
+import {
+  Link,
+  Routes,
+  Route,
+  useLocation,
+  useNavigate,
+} from "react-router-dom";
+import { UserOutlined } from "@ant-design/icons";
 
 import { Container, Row, Col, Navbar, Nav } from "react-bootstrap";
 
@@ -8,6 +15,9 @@ import Books from "../views/Books";
 import CreateBook from "../views/books/CreateBook";
 import EditBook from "../views/books/EditBook";
 import About from "../views/About";
+import { useDispatch, useSelector } from "react-redux";
+import { authSelector } from "../store/selectors/auth.selector";
+import { logout } from "../store/actions/auth.action";
 // const { Header, Footer, Sider, Content } = Layout;
 
 function Main() {
@@ -26,16 +36,27 @@ function Main() {
         You can read books and also create new book, update existing book and
         delete book.
       </div>
-      <div className="mt-1">
-        I implement jwt authentication but I have no enough time to complete
-        that.
+      <div className="mt-2">
+        For editing books you should login first. The default user is 'admin'
+        and password is 'admin'
       </div>
     </div>
   );
 }
 
 function Home(props) {
+  const _authSelector = useSelector(authSelector);
+
+  const navigate = useNavigate();
   const { pathname } = useLocation();
+  const dispatch = useDispatch();
+
+  const [username] = useState("admin")
+
+  const _logOut = () => {
+    dispatch(logout());
+    navigate("/");
+  };
 
   return (
     // <div>
@@ -67,9 +88,29 @@ function Home(props) {
                 </NavDropdown> */}
             </Nav>
             <Nav>
-              <Nav.Link as={Link} to="/login">
-                Login
-              </Nav.Link>
+              {!_authSelector.loggedIn && (
+                <Nav.Link as={Link} to="/login">
+                  Login
+                </Nav.Link>
+              )}
+
+              {_authSelector.loggedIn && (
+                <soan>
+                  <Avatar
+                    shape="square"
+                    size="large"
+                    icon={<UserOutlined />}
+                    className="mr-2"
+                  />
+                  <span style={{ color: "white" }} className="mr-5">
+                    {username}
+                  </span>
+                </soan>
+              )}
+              {_authSelector.loggedIn && (
+                <Nav.Link onClick={_logOut}>LogOut</Nav.Link>
+              )}
+
               {/* <Nav.Link as={Link} to="/about">
                   More deets
                 </Nav.Link>

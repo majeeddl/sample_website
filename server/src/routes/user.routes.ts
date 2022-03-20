@@ -4,9 +4,6 @@ import { IResponse } from "../interfaces/IResponse";
 
 const router: Router = Router();
 
-
-router.get("/api/v1/users",async (req:IRequest,res:IResponse)=>{
-
-});
+router.get("/api/v1/users", async (req: IRequest, res: IResponse) => {});
 
 export const UserRouter = router;

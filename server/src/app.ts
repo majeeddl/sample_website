@@ -19,6 +19,7 @@ import { BookRouter } from "./routes/book.routes";
 import { UserRouter } from "./routes/user.routes";
 import { FileRouter } from "./routes/file.routes";
 import { jwtMiddleware } from "./middlewares/jwt.middleware";
+import { AccountRouter } from "./routes/account.routs";
 
 const app: express.Application = express();
 
@@ -42,8 +43,10 @@ app.use(BookRouter);
 app.use(UserRouter);
 app.use(FileRouter);
 
+app.use(jwtMiddleware);
 
-app.use(jwtMiddleware)
+app.use(AccountRouter);
+
 //jwt verification
 // app.use(async (req: IRequest, res: IResponse, next: any) => {
 //   try {
@@ -78,8 +81,6 @@ app.use(jwtMiddleware)
 //     });
 //   }
 // });
-
-
 
 const port = process.env.PORT;
 

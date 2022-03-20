@@ -14,8 +14,12 @@ import {
   notification,
 } from "antd";
 import { PlusCircleOutlined } from "@ant-design/icons";
+import { useSelector } from "react-redux";
+import { authSelector } from "../store/selectors/auth.selector";
 
 const Books = () => {
+  const _authSelector = useSelector(authSelector);
+
   const [loading, setLoading] = useState(true);
   const [books, setBooks] = useState([
     {
@@ -84,13 +88,15 @@ const Books = () => {
         <div className="mt-2">
           You can see the list of books here:
           <div className="float-right">
-            <Button
-              icon={<PlusCircleOutlined />}
-              type="primary"
-              onClick={goCreateBook}
-            >
-              Add New Book
-            </Button>
+            {_authSelector.loggedIn && (
+              <Button
+                icon={<PlusCircleOutlined />}
+                type="primary"
+                onClick={goCreateBook}
+              >
+                Add New Book
+              </Button>
+            )}
           </div>
         </div>
         <Divider></Divider>
@@ -115,23 +121,27 @@ const Books = () => {
                 <List.Item
                   key={item.title}
                   actions={[
-                    <a
-                      key="list-loadmore-edit"
-                      onClick={() => goEditBook(item._id)}
-                    >
-                      edit
-                    </a>,
-                    <Popconfirm
-                      title="Are you sure to delete this book?"
-                      onConfirm={() => confirm(item._id)}
-                      onCancel={cancel}
-                      okText="Yes"
-                      cancelText="No"
-                    >
-                      <a key="list-loadmore-more" href="#">
-                        delete
+                    _authSelector.loggedIn && (
+                      <a
+                        key="list-loadmore-edit"
+                        onClick={() => goEditBook(item._id)}
+                      >
+                        edit
                       </a>
-                    </Popconfirm>,
+                    ),
+                    _authSelector.loggedIn && (
+                      <Popconfirm
+                        title="Are you sure to delete this book?"
+                        onConfirm={() => confirm(item._id)}
+                        onCancel={cancel}
+                        okText="Yes"
+                        cancelText="No"
+                      >
+                        <a key="list-loadmore-more" href="#">
+                          delete
+                        </a>
+                      </Popconfirm>
+                    ),
                   ]}
                   extra={
                     <Image

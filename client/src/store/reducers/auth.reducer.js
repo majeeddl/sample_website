@@ -1,9 +1,12 @@
-import { AUTHENTICATED, NOT_AUTHENTICATED } from "../actionTypes";
+import { AUTHENTICATED, ERROR_AUTHENTICATE, NOT_AUTHENTICATED } from "../actionTypes";
 
 const initialState = {
   authChecked: false,
   loggedIn: false,
-  currentUser: {},
+  token : null,
+  currentUser: {
+  },
+  error : ""
 };
 
 const authorizationReducer = (state = initialState, action) => {
@@ -12,14 +15,26 @@ const authorizationReducer = (state = initialState, action) => {
       return {
         authChecked: true,
         loggedIn: true,
-        currentUser: action.payload,
+        currentUser: action.payload.user,
+        token: action.payload.token,
+        error : null
       };
     case NOT_AUTHENTICATED:
       return {
         authChecked: true,
         loggedIn: false,
         currentUser: {},
+        token: null,
+        error : null
       };
+    case ERROR_AUTHENTICATE:
+      return {
+        authChecked: true,
+        loggedIn: false,
+        currentUser: {},
+        token : null,
+        error : action.payload
+      }
     default:
       return state;
   }

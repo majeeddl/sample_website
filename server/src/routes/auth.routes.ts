@@ -40,7 +40,11 @@ router.post("/api/v1/auth/login", async (req: IRequest, res: IResponse) => {
 
         res.json({
             status : true,
-            token : token
+            token : token,
+            user : {
+              username : findUser.username,
+              name : findUser.name,
+            }
         })
     }else{
         return res.json({
