@@ -17,6 +17,15 @@ The server application run on port 3001
 1. Nodejs
 2. Mongo db
 
+## Introduction
+In this project we can see books page that each book contains title,description and image. The admin user after login can add, edit, delete each of books.
+Image of books save in mongo db database;
+
+
+React and React Router are used for fronend development, as well as React Redux and Redux Trunk are used for store management.
+Also, Some React UI library such as React-bootstrap,Antd and Tailwindcss are use for UI development;
+
+A server's backend API is based on Express with Typescript; The client and server communicate via REST API.
 
 ## Installation
 
